@@ -1,0 +1,4 @@
+aio-pika
+httpx
+psycopg2-binary
+SQLAlchemy==1.4.52

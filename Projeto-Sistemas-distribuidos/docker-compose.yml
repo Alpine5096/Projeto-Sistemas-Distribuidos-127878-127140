@@ -1,0 +1,217 @@
+version: '3.9'
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  microservices_pgdata:
+
+services:
+  nginx:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile.nginx
+    container_name: nginx-gateway
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    depends_on:
+      - orders
+      - payments
+      - logs
+      - notifications
+      - metricas
+      - prometheus
+      - grafana
+      - api-gateway
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  orders:
+    build: ./orders
+    container_name: orders-service
+    expose:
+      - "5001"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  payments:
+    build: ./payments
+    container_name: payments-service
+    expose:
+      - "5002"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  logs:
+    build: ./logs
+    container_name: logs-service
+    expose:
+      - "5003"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  notifications:
+    build: ./notifications
+    container_name: notifications-service
+    expose:
+      - "5004"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  metricas:
+    build: ./metricas
+    container_name: metricas-service
+    expose:
+      - "5005"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://localhost/prometheus/'
+      - '--web.route-prefix=/'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}'
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SERVER_ROOT_URL=http://localhost/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:2.8.2
+    container_name: loki
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: microsvc
+      POSTGRES_USER: micro
+      POSTGRES_PASSWORD: micropass
+    volumes:
+      - microservices_pgdata:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "15672:15672" # management UI
+    networks:
+      - microservices-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://micro:micropass@postgres:5432/microsvc
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      SERVICES_LIST: "http://orders-service:5001,http://payments-service:5002,http://logs-service:5003,http://notifications-service:5004,http://metricas-service:5005"
+    depends_on:
+      - postgres
+      - rabbitmq
+    ports:
+      - "8000:8000"
+    networks:
+      - microservices-network
+
+  event-worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      DATABASE_URL: postgresql://micro:micropass@postgres:5432/microsvc
+    depends_on:
+      - rabbitmq
+      - postgres
+    networks:
+      - microservices-network
