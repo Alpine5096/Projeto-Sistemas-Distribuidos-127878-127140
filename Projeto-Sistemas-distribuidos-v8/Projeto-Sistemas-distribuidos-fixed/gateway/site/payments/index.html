@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payments — DevOps Dashboard</title>
+
+  <link rel="stylesheet" href="../basic.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="fade">
+
+<nav class="navbar">
+    <div class="title"><a href="/" style="color:inherit;text-decoration:none;">⚙️ DevOps Dashboard</a></div>
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/prometheus/">Prometheus</a></li>
+        <li><a href="/grafana/">Grafana</a></li>
+    </ul>
+</nav>
+
+<header class="hero">
+  <h1>Payments Service</h1>
+  <p>Processamento e validação de pagamentos.</p>
+</header>
+
+<main style="max-width:1100px;margin:50px auto;">
+
+  <h2>Estado do Serviço</h2>
+  <div class="card" style="text-align:center;">
+    <span class="emoji" style="font-size:40px;">💳</span>
+    <h3 id="status-text">Carregando...</h3>
+    <p id="latency-info"></p>
+  </div>
+
+  <h2>Ações Rápidas</h2>
+  <div class="grid">
+      <!-- Adicionado onclick handlers para chamar funções JS -->
+      <a class="card" href="#" onclick="processarPagamentoModal(); return false;"><span class="emoji">💰</span>Processar Pagamento</a>
+      <a class="card" href="#" onclick="listarPagamentos(); return false;"><span class="emoji">📄</span>Listar Pagamentos</a>
+      <a class="card" href="/grafana/" target="_blank"><span class="emoji">📊</span>Métricas</a>
+  </div>
+  
+  <h2>Pagamentos Registados</h2>
+  <div class="card">
+      <table id="payments-table" style="width:100%; text-align:left;">
+          <thead>
+              <tr><th>ID</th><th>Order ID</th><th>Quantia (€)</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+              <!-- Pagamentos serão inseridos aqui via JavaScript -->
+          </tbody>
+      </table>
+      <p id="payments-count">Total de pagamentos: 0</p>
+  </div>
+
+</main>
+
+<footer>
+  © <span id="year"></span> DevOps Dashboard — Projeto SD
+</footer>
+
+<script src="../main.js"></script>
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+
+// Define o URL base do seu serviço de pagamentos
+// Assumindo que o Nginx gateway encaminha /payments-api para o serviço payments
+const PAYMENTS_API_URL = "/api/payments";
+
+// --- Funções de Estado do Serviço (Existente) ---
+async function loadStatus() {
+    try {
+        // Assume que este endpoint /api/health é fornecido pelo seu API Gateway
+        const r = await fetch("/api/health");
+        const data = await r.json();
+        // Nota: O nome do serviço no gateway pode ser diferente de "payments"
+        const svc = data.services.find(s => s.name.includes("payments"));
+
+        if (!svc) return;
+
+        document.getElementById("status-text").textContent =
+            svc.status === "online" ? "Online" : "Offline";
+
+        document.getElementById("latency-info").textContent =
+            svc.latency_ms ? `Latência: ${svc.latency_ms}ms` : "Sem dados";
+    } catch (e) {
+        document.getElementById("status-text").textContent = "Erro ao carregar";
+    }
+}
+loadStatus();
+setInterval(loadStatus, 8000);
+
+
+// --- Nova Função: Listar Pagamentos ---
+async function listarPagamentos() {
+    try {
+        const response = await fetch(PAYMENTS_API_URL + '/payments');
+        if (!response.ok) throw new Error('Erro ao buscar pagamentos');
+        
+        const data = await response.json();
+        const tbody = document.querySelector('#payments-table tbody');
+        tbody.innerHTML = ''; // Limpa a tabela
+
+        data.payments.forEach(payment => {
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = payment.id.substring(0, 8) + '...';
+            row.insertCell(1).textContent = payment.order_id;
+            row.insertCell(2).textContent = payment.amount.toFixed(2);
+            row.insertCell(3).textContent = payment.status;
+        });
+
+        document.getElementById("payments-count").textContent = 'Total de pagamentos: ' + data.total;
+
+    } catch (error) {
+        console.error("Erro ao listar pagamentos:", error);
+        alert("Não foi possível carregar os pagamentos.");
+    }
+}
+
+// Carrega a lista de pagamentos automaticamente ao carregar a página
+listarPagamentos();
+
+
+// --- Nova Função: Processar Novo Pagamento (POST) ---
+function processarPagamentoModal() {
+    const orderId = prompt("Insira o ID do Pedido (Order ID):", Math.floor(Math.random() * 100) + 1);
+    if (!orderId) return;
+
+    const amount = prompt("Insira a Quantia (EUR):", (Math.random() * 1000).toFixed(2));
+    if (!amount) return;
+
+    criarPagamento(parseInt(orderId), parseFloat(amount));
+}
+
+async function criarPagamento(orderId, amount) {
+    try {
+        const response = await fetch(PAYMENTS_API_URL + '/create_payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ order_id: orderId, amount: amount })
+        });
+
+        if (!response.ok) throw new Error('Erro ao criar pagamento');
+
+        const newPayment = await response.json();
+        alert('Pagamento #' + newPayment.id.substring(0, 8) + ' criado com sucesso! Status: ' + newPayment.status);
+        
+        // Atualiza a lista automaticamente após a criação
+        listarPagamentos(); 
+
+    } catch (error) {
+        console.error("Erro ao criar pagamento:", error);
+        alert("Ocorreu um erro ao processar o pagamento.");
+    }
+}
+</script>
+
+</body>
+</html>
