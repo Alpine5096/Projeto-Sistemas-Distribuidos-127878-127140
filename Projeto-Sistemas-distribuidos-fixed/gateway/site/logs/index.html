@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Logs — DevOps Dashboard</title>
+
+  <link rel="stylesheet" href="../basic.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="fade">
+
+<nav class="navbar">
+    <div class="title"><a href="/" style="color:inherit;text-decoration:none;">⚙️ DevOps Dashboard</a></div>
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/prometheus/">Prometheus</a></li>
+        <li><a href="/grafana/">Grafana</a></li>
+    </ul>
+</nav>
+
+<header class="hero">
+  <h1>Logs Service</h1>
+  <p>Sistema centralizado de recolha e análise de logs.</p>
+</header>
+
+<main style="max-width:1100px;margin:50px auto;">
+
+  <h2>Estado do Serviço</h2>
+  <div class="card" style="text-align:center;">
+    <span class="emoji" style="font-size:40px;">📄</span>
+    <h3 id="status-text">Carregando...</h3>
+    <p id="latency-info"></p>
+  </div>
+
+  <h2>Ações Rápidas</h2>
+  <div class="grid">
+      <a class="card" href="#"><span class="emoji">🔍</span>Pesquisar Logs</a>
+      <a class="card" href="#"><span class="emoji">🧹</span>Limpar Logs</a>
+      <a class="card" href="#"><span class="emoji">📊</span>Métricas</a>
+  </div>
+
+</main>
+
+<footer>
+  © <span id="year"></span> DevOps Dashboard — Projeto SD
+</footer>
+
+<script src="../main.js"></script>
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+
+async function loadStatus() {
+    try {
+        const r = await fetch("/api/health");
+        const data = await r.json();
+        const svc = data.services.find(s => s.name.includes("logs"));
+
+        if (!svc) return;
+
+        document.getElementById("status-text").textContent =
+            svc.status === "online" ? "Online" : "Offline";
+
+        document.getElementById("latency-info").textContent =
+            svc.latency_ms ? \`Latência: \${svc.latency_ms}ms\` : "Sem dados";
+    } catch (e) {
+        document.getElementById("status-text").textContent = "Erro ao carregar";
+    }
+}
+loadStatus();
+setInterval(loadStatus, 8000);
+</script>
+
+</body>
+</html>

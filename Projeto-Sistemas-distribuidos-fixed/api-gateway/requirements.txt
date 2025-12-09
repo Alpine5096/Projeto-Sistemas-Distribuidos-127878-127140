@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+httpx[http2]
+psycopg2-binary
+SQLAlchemy==1.4.52
+alembic
+aio-pika
+pydantic

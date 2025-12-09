@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dashboard DevOps unificado — monitorização, métricas e gestão de microserviços.">
+  <meta name="theme-color" content="#0f172a">
+  <title>DevOps Dashboard — Projeto SD</title>
+
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="basic.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="fade">
+  <a class="skip-link" href="#main">Saltar para o conteúdo</a>
+
+  <header class="site-header">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">
+        <span class="brand-logo" aria-hidden="true">⚙️</span>
+        DevOps Dashboard
+      </a>
+      <button class="navbar-toggler" type="button" aria-expanded="false" aria-controls="primary-menu" aria-label="Alternar menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="primary-menu">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="/" aria-current="page">Início</a></li>
+          <li class="nav-item"><a class="nav-link" href="/prometheus/">Prometheus</a></li>
+          <li class="nav-item"><a class="nav-link" href="/grafana/">Grafana</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="hero text-center">
+      <h1>Infraestrutura e Microserviços</h1>
+      <p class="hero-sub">Monitorização, métricas e gestão centralizadas para operações confiáveis e escaláveis.</p>
+      <p class="hero-cta">
+        <a class="btn btn-primary" href="/metricas/">Ver métricas</a>
+        <a class="btn btn-secondary" href="/health">Health check</a>
+      </p>
+    </div>
+  </header>
+
+  <main id="main" class="container my-5" role="main">
+    <section id="microservices" aria-labelledby="microservices-title">
+      <h2 id="microservices-title">Microserviços</h2>
+      <div class="row">
+        <div class="col-md-4">
+          <a class="card" href="/orders/" title="Pedidos">
+            <div class="card-body">
+              <span class="emoji" aria-hidden="true">📦</span>
+              <h5 class="card-title">Pedidos</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="card" href="/payments/" title="Pagamentos">
+            <div class="card-body">
+              <span class="emoji" aria-hidden="true">💳</span>
+              <h5 class="card-title">Pagamentos</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="card" href="/logs/" title="Logs">
+            <div class="card-body">
+              <span class="emoji" aria-hidden="true">📄</span>
+              <h5 class="card-title">Logs</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="card" href="/notifications/" title="Notificações">
+            <div class="card-body">
+              <span class="emoji" aria-hidden="true">🔔</span>
+              <h5 class="card-title">Notificações</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="card" href="/metricas/" title="Métricas">
+            <div class="card-body">
+              <span class="emoji" aria-hidden="true">📊</span>
+              <h5 class="card-title">Métricas</h5>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="monitoring" aria-labelledby="monitoring-title" class="mt-5">
+      <h2 id="monitoring-title">Monitorização</h2>
+      <div class="row">
+        <div class="col-md-4">
+          <a class="card" href="/prometheus/" title="Prometheus">
+            <div class="card-body">
+              <span class="emoji" aria-hidden="true">📈</span>
+              <h5 class="card-title">Prometheus</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="card" href="/grafana/" title="Grafana">
+            <div class="card-body">
+              <span class="emoji" aria-hidden="true">📉</span>
+              <h5 class="card-title">Grafana</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a class="card health" href="/health" title="Verificação de integridade">
+            <div class="card-body">
+              <span class="emoji" aria-hidden="true">❤️</span>
+              <h5 class="card-title">Health Check</h5>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer bg-dark text-light py-3">
+    <div class="container text-center">
+      <small>© <span id="year">2025</span> DevOps Dashboard — Projeto SD</small>
+      <nav class="footer-nav">
+        <a class="text-light" href="/privacy/">Privacidade</a>
+        <a class="text-light" href="/status/">Status</a>
+        <a class="text-light" href="/contact/">Contacto</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const toggle = document.querySelector('.navbar-toggler');
+    const menu = document.getElementById('primary-menu');
+    if (toggle && menu) {
+      toggle.addEventListener('click', () => {
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        menu.classList.toggle('show');
+      });
+    }
+  </script>
+</body>
+</html>
