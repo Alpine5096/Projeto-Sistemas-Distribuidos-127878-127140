@@ -1,0 +1,126 @@
+{
+  "uid": "microservices-dashboard",
+  "title": "Microserviços Dashboard",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Requests - API Gateway",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 5 },
+      "targets": [{ "expr": "sum(api_gateway_requests_total)" }]
+    },
+    {
+      "type": "stat",
+      "title": "Requests/s - API Gateway",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 5 },
+      "targets": [{ "expr": "sum(rate(api_gateway_requests_total[1m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latência p95 - API Gateway",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 7 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(api_gateway_request_duration_seconds_bucket[5m])) by (le))"
+        }
+      ]
+    },
+
+    {
+      "type": "stat",
+      "title": "Total Orders",
+      "gridPos": { "x": 0, "y": 7, "w": 6, "h": 5 },
+      "targets": [{ "expr": "sum(orders_requests_total)" }]
+    },
+    {
+      "type": "stat",
+      "title": "Orders/s",
+      "gridPos": { "x": 6, "y": 7, "w": 6, "h": 5 },
+      "targets": [{ "expr": "sum(rate(orders_requests_total[1m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latência p95 - Orders",
+      "gridPos": { "x": 12, "y": 7, "w": 12, "h": 7 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(orders_request_duration_seconds_bucket[5m])) by (le))"
+        }
+      ]
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Erros/s - API Gateway",
+      "gridPos": { "x": 0, "y": 14, "w": 6, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(api_gateway_requests_total{status!~\"2..\"}[1m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latência média - API Gateway",
+      "gridPos": { "x": 6, "y": 14, "w": 6, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(api_gateway_request_duration_seconds_sum[5m])) / sum(rate(api_gateway_request_duration_seconds_count[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latência média - Orders",
+      "gridPos": { "x": 12, "y": 14, "w": 6, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(orders_request_duration_seconds_sum[5m])) / sum(rate(orders_request_duration_seconds_count[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latência média - Payments",
+      "gridPos": { "x": 18, "y": 14, "w": 6, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(payments_request_duration_seconds_sum[5m])) / sum(rate(payments_request_duration_seconds_count[5m]))"
+        }
+      ]
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Requests/s - Todos os serviços",
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 7 },
+      "targets": [
+        { "expr": "sum(rate(api_gateway_requests_total[1m]))" },
+        { "expr": "sum(rate(orders_requests_total[1m]))" },
+        { "expr": "sum(rate(payments_requests_total[1m]))" },
+        { "expr": "sum(rate(notifications_requests_total[1m]))" },
+        { "expr": "sum(rate(metricas_requests_total[1m]))" }
+      ]
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Erros/s - Todos os serviços",
+      "gridPos": { "x": 0, "y": 27, "w": 24, "h": 7 },
+      "targets": [
+        { "expr": "sum(rate(api_gateway_requests_total{status!~\"2..\"}[1m]))" },
+        { "expr": "sum(rate(orders_requests_total{status!~\"2..\"}[1m]))" },
+        { "expr": "sum(rate(payments_requests_total{status!~\"2..\"}[1m]))" },
+        { "expr": "sum(rate(notifications_requests_total{status!~\"2..\"}[1m]))" },
+        { "expr": "sum(rate(metricas_requests_total{status!~\"2..\"}[1m]))" }
+      ]
+    }
+  ]
+}
