@@ -1,0 +1,181 @@
+{
+  "uid": "microservices-dashboard-full",
+  "title": "Microserviços – Observabilidade Completa",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+
+
+    {
+      "type": "stat",
+      "title": "API Gateway – Total Requests",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(api_gateway_requests_total)" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "API Gateway – Requests/s",
+      "gridPos": { "x": 4, "y": 0, "w": 8, "h": 4 },
+      "targets": [{ "expr": "sum(rate(api_gateway_requests_total[1m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "API Gateway – Latência média",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "sum(rate(api_gateway_request_duration_seconds_sum[5m])) / sum(rate(api_gateway_request_duration_seconds_count[5m]))"
+      }]
+    },
+    {
+      "type": "timeseries",
+      "title": "API Gateway – Latência p95",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(api_gateway_request_duration_seconds_bucket[5m])) by (le))"
+      }]
+    },
+    {
+      "type": "timeseries",
+      "title": "API Gateway – Erros/s",
+      "gridPos": { "x": 0, "y": 4, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "sum(rate(api_gateway_requests_total{status!~\"2..\"}[1m]))"
+      }]
+    },
+
+ 
+    {
+      "type": "stat",
+      "title": "Orders – Total Requests",
+      "gridPos": { "x": 0, "y": 8, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(orders_requests_total)" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Orders – Requests/s",
+      "gridPos": { "x": 4, "y": 8, "w": 8, "h": 4 },
+      "targets": [{ "expr": "sum(rate(orders_requests_total[1m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Orders – Latência média",
+      "gridPos": { "x": 12, "y": 8, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "sum(rate(orders_request_duration_seconds_sum[5m])) / sum(rate(orders_request_duration_seconds_count[5m]))"
+      }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Orders – Latência p95",
+      "gridPos": { "x": 18, "y": 8, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(orders_request_duration_seconds_bucket[5m])) by (le))"
+      }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Orders – Erros/s",
+      "gridPos": { "x": 0, "y": 12, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "sum(rate(orders_requests_total{status!~\"2..\"}[1m]))"
+      }]
+    },
+
+
+
+    {
+      "type": "stat",
+      "title": "Payments – Total Requests",
+      "gridPos": { "x": 0, "y": 16, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(payments_requests_total)" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Payments – Requests/s",
+      "gridPos": { "x": 4, "y": 16, "w": 8, "h": 4 },
+      "targets": [{ "expr": "sum(rate(payments_requests_total[1m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Payments – Latência média",
+      "gridPos": { "x": 12, "y": 16, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "sum(rate(payments_request_duration_seconds_sum[5m])) / sum(rate(payments_request_duration_seconds_count[5m]))"
+      }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Payments – Latência p95",
+      "gridPos": { "x": 18, "y": 16, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(payments_request_duration_seconds_bucket[5m])) by (le))"
+      }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Payments – Erros/s",
+      "gridPos": { "x": 0, "y": 20, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "sum(rate(payments_requests_total{status!~\"2..\"}[1m]))"
+      }]
+    },
+
+
+    {
+      "type": "stat",
+      "title": "Notifications – Total Requests",
+      "gridPos": { "x": 0, "y": 24, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(notifications_requests_total)" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Notifications – Requests/s",
+      "gridPos": { "x": 4, "y": 24, "w": 8, "h": 4 },
+      "targets": [{ "expr": "sum(rate(notifications_requests_total[1m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Notifications – Latência média",
+      "gridPos": { "x": 12, "y": 24, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "sum(rate(notifications_request_duration_seconds_sum[5m])) / sum(rate(notifications_request_duration_seconds_count[5m]))"
+      }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Notifications – Latência p95",
+      "gridPos": { "x": 18, "y": 24, "w": 6, "h": 4 },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(notifications_request_duration_seconds_bucket[5m])) by (le))"
+      }]
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Requests/s – Todos os Serviços",
+      "gridPos": { "x": 0, "y": 30, "w": 24, "h": 6 },
+      "targets": [
+        { "expr": "sum(rate(api_gateway_requests_total[1m]))" },
+        { "expr": "sum(rate(orders_requests_total[1m]))" },
+        { "expr": "sum(rate(payments_requests_total[1m]))" },
+        { "expr": "sum(rate(notifications_requests_total[1m]))" },
+        { "expr": "sum(rate(metricas_requests_total[1m]))" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Erros/s – Todos os Serviços",
+      "gridPos": { "x": 0, "y": 36, "w": 24, "h": 6 },
+      "targets": [
+        { "expr": "sum(rate(api_gateway_requests_total{status!~\"2..\"}[1m]))" },
+        { "expr": "sum(rate(orders_requests_total{status!~\"2..\"}[1m]))" },
+        { "expr": "sum(rate(payments_requests_total{status!~\"2..\"}[1m]))" },
+        { "expr": "sum(rate(notifications_requests_total{status!~\"2..\"}[1m]))" },
+        { "expr": "sum(rate(metricas_requests_total{status!~\"2..\"}[1m]))" }
+      ]
+    }
+  ]
+}

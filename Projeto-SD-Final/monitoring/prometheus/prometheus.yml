@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - prometheus:9090
+
+  - job_name: api-gateway
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - api-gateway:8000
+
+  - job_name: orders
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - orders:5001
+
+  - job_name: payments
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - payments:5002
+
+  - job_name: logs
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - logs:5003
+
+  - job_name: notifications
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - notifications:5004
+
+  - job_name: metricas
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - metricas:5005
